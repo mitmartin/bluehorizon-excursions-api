@@ -93,7 +93,13 @@ export class ExcursionService {
           reasons
         };
       })
-      .sort((a, b) => b.score - a.score || a.excursionId.localeCompare(b.excursionId));
+      .sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+
+        return a.excursionId < b.excursionId ? -1 : a.excursionId > b.excursionId ? 1 : 0;
+      });
 
     const recommendations: ExcursionRecommendation[] = [];
     const seenPorts = new Set<string>();
