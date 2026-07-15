@@ -21,6 +21,17 @@ excursionsRouter.get('/search', (req, res) => {
   res.json({ data: service.search({ port, date, maxPrice, q }) });
 });
 
+excursionsRouter.get('/recommendations', (req, res) => {
+  const guestId = typeof req.query.guestId === 'string' ? req.query.guestId.trim() : '';
+
+  if (!guestId) {
+    res.status(400).json({ error: 'guestId query parameter is required' });
+    return;
+  }
+
+  res.json(service.getRecommendations(guestId));
+});
+
 excursionsRouter.get('/:id', (req, res) => {
   const excursion = service.getExcursion(req.params.id);
 

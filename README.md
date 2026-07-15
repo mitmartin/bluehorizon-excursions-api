@@ -83,31 +83,20 @@ Example:
 GET /excursions/search?port=CZM&date=2026-08-17&maxPrice=150&q=reef
 ```
 
-### `POST /bookings`
+### `GET /excursions/recommendations`
 
-Creates a booking.
+Returns ranked excursion recommendations for a guest.
 
-```json
-{
-  "excursionId": "exc-nas-reef-01",
-  "guestId": "guest-1042",
-  "guestName": "Avery Morgan",
-  "partySize": 2,
-  "departureId": "dep-nas-reef-20260815-am"
-}
-```
+- Required query parameter: `guestId`
+- Returns `400` when `guestId` is missing.
 
-Returns `201 Created` and the booking record.
-
-## Planned concierge contract
-
-A future endpoint should be added for `bluehorizon-concierge-agent`:
+Example:
 
 ```http
 GET /excursions/recommendations?guestId=guest-1042
 ```
 
-Expected response shape:
+Response shape:
 
 ```json
 {
@@ -123,7 +112,21 @@ Expected response shape:
 }
 ```
 
-See the open `good first issue` for implementation details.
+### `POST /bookings`
+
+Creates a booking.
+
+```json
+{
+  "excursionId": "exc-nas-reef-01",
+  "guestId": "guest-1042",
+  "guestName": "Avery Morgan",
+  "partySize": 2,
+  "departureId": "dep-nas-reef-20260815-am"
+}
+```
+
+Returns `201 Created` and the booking record.
 
 ## Brownfield demo notes
 

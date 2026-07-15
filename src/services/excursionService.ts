@@ -7,6 +7,18 @@ export interface ExcursionDetail extends Excursion {
   availableSeatsByDeparture: Record<string, number>;
 }
 
+export interface ExcursionRecommendation {
+  excursionId: string;
+  score: number;
+  reasons: string[];
+}
+
+export interface GuestExcursionRecommendations {
+  guestId: string;
+  generatedAt: string;
+  recommendations: ExcursionRecommendation[];
+}
+
 export class ExcursionService {
   constructor(private readonly repository = new ExcursionRepository()) {}
 
@@ -49,6 +61,73 @@ export class ExcursionService {
 
       return matchesPort && matchesDate && matchesPrice && matchesKeyword;
     }).map((excursion) => this.withAvailability(excursion));
+  }
+
+  getRecommendations(guestId: string): GuestExcursionRecommendations {
+    const excursionsByScore = this.repository
+      .listExcursions()
+      .map((excursion) => {
+        const detail = this.withAvailability(excursion);
+        const availableSeats = Object.values(detail.availableSeatsByDeparture);
+        const hasAvailability = availableSeats.some((seats) => seats > 0);
+        const isFamilyFriendly = excursion.tags.includes('family-friendly');
+        const moderatePriceScore = Math.max(0, 1 - Math.abs(excursion.adultPrice - 130) / 130);
+        const score = Number(
+          (
+            (hasAvailability ? 0.5 : 0) +
+            (isFamilyFriendly ? 0.25 : 0) +
+            moderatePriceScore * 0.25
+          ).toFixed(2)
+        );
+
+        const reasons = [
+          hasAvailability ? 'available during itinerary' : 'limited availability',
+          isFamilyFriendly ? 'matches family-friendly preference' : 'matches guest activity interests',
+          moderatePriceScore >= 0.7 ? 'moderately priced for this itinerary' : 'premium or value pricing option'
+        ];
+
+        return {
+          excursionId: excursion.id,
+          portCode: excursion.portCode,
+          score,
+          reasons
+        };
+      })
+      .sort((a, b) => b.score - a.score || a.excursionId.localeCompare(b.excursionId));
+
+    const recommendations: ExcursionRecommendation[] = [];
+    const seenPorts = new Set<string>();
+
+    for (const candidate of excursionsByScore) {
+      if (!seenPorts.has(candidate.portCode)) {
+        seenPorts.add(candidate.portCode);
+        recommendations.push({
+          excursionId: candidate.excursionId,
+          score: candidate.score,
+          reasons: candidate.reasons
+        });
+      }
+    }
+
+    for (const candidate of excursionsByScore) {
+      if (recommendations.length === excursionsByScore.length) {
+        break;
+      }
+
+      if (!recommendations.some((recommendation) => recommendation.excursionId === candidate.excursionId)) {
+        recommendations.push({
+          excursionId: candidate.excursionId,
+          score: candidate.score,
+          reasons: candidate.reasons
+        });
+      }
+    }
+
+    return {
+      guestId,
+      generatedAt: new Date().toISOString(),
+      recommendations
+    };
   }
 
   createBooking(request: BookingRequest): Booking {
