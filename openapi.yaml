@@ -34,6 +34,20 @@ paths:
       responses:
         '200':
           description: Excursion list
+  /excursions/recommendations:
+    get:
+      summary: Get ranked recommendations for a guest
+      parameters:
+        - in: query
+          name: guestId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ranked recommendations
+        '400':
+          description: Missing guestId query parameter
   /excursions/{id}:
     get:
       summary: Get excursion by ID

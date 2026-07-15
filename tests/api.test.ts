@@ -45,6 +45,56 @@ describe('Blue Horizon Excursions API', () => {
     ]);
   });
 
+  it('returns ranked excursion recommendations for a guest', async () => {
+    const [response, portsResponse, excursionsResponse] = await Promise.all([
+      request(app).get('/excursions/recommendations?guestId=guest-1042'),
+      request(app).get('/ports'),
+      request(app).get('/excursions')
+    ]);
+
+    expect(response.status).toBe(200);
+    expect(portsResponse.status).toBe(200);
+    expect(excursionsResponse.status).toBe(200);
+    expect(response.body.guestId).toBe('guest-1042');
+    expect(response.body.generatedAt).toEqual(expect.any(String));
+    expect(response.body.recommendations.length).toBeGreaterThan(0);
+    expect(response.body.recommendations[0]).toEqual({
+      excursionId: expect.any(String),
+      score: expect.any(Number),
+      reasons: expect.any(Array)
+    });
+    expect(response.body.recommendations[0].reasons).toContain('available during itinerary');
+    expect(
+      new Set(response.body.recommendations.map((recommendation: { excursionId: string }) => recommendation.excursionId))
+        .size
+    ).toBe(response.body.recommendations.length);
+
+    expect(
+      response.body.recommendations.some((recommendation: { reasons: string[] }) =>
+        recommendation.reasons.includes('matches family-friendly preference')
+      )
+    ).toBe(true);
+
+    const portByExcursionId = new Map(
+      excursionsResponse.body.data.map((excursion: { id: string; portCode: string }) => [excursion.id, excursion.portCode])
+    );
+    const expectedUniquePorts = portsResponse.body.data.length;
+    expect(
+      new Set(
+        response.body.recommendations
+          .slice(0, expectedUniquePorts)
+          .map((recommendation: { excursionId: string }) => portByExcursionId.get(recommendation.excursionId))
+      ).size
+    ).toBe(expectedUniquePorts);
+  });
+
+  it('returns 400 when recommendations guestId is missing', async () => {
+    const response = await request(app).get('/excursions/recommendations');
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('guestId query parameter is required');
+  });
+
   it('creates a booking for a valid request', async () => {
     const response = await request(app)
       .post('/bookings')
