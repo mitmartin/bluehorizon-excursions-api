@@ -104,27 +104,29 @@ export class ExcursionService {
     const recommendations: ExcursionRecommendation[] = [];
     const seenPorts = new Set<string>();
     const recommendedExcursionIds = new Set<string>();
+    const appendRecommendation = (candidate: {
+      excursionId: string;
+      score: number;
+      reasons: string[];
+    }) => {
+      recommendedExcursionIds.add(candidate.excursionId);
+      recommendations.push({
+        excursionId: candidate.excursionId,
+        score: candidate.score,
+        reasons: candidate.reasons
+      });
+    };
 
     for (const candidate of excursionsByScore) {
       if (!seenPorts.has(candidate.portCode)) {
         seenPorts.add(candidate.portCode);
-        recommendedExcursionIds.add(candidate.excursionId);
-        recommendations.push({
-          excursionId: candidate.excursionId,
-          score: candidate.score,
-          reasons: candidate.reasons
-        });
+        appendRecommendation(candidate);
       }
     }
 
     for (const candidate of excursionsByScore) {
       if (!recommendedExcursionIds.has(candidate.excursionId)) {
-        recommendedExcursionIds.add(candidate.excursionId);
-        recommendations.push({
-          excursionId: candidate.excursionId,
-          score: candidate.score,
-          reasons: candidate.reasons
-        });
+        appendRecommendation(candidate);
       }
     }
 
