@@ -97,10 +97,12 @@ export class ExcursionService {
 
     const recommendations: ExcursionRecommendation[] = [];
     const seenPorts = new Set<string>();
+    const recommendedExcursionIds = new Set<string>();
 
     for (const candidate of excursionsByScore) {
       if (!seenPorts.has(candidate.portCode)) {
         seenPorts.add(candidate.portCode);
+        recommendedExcursionIds.add(candidate.excursionId);
         recommendations.push({
           excursionId: candidate.excursionId,
           score: candidate.score,
@@ -110,11 +112,8 @@ export class ExcursionService {
     }
 
     for (const candidate of excursionsByScore) {
-      if (recommendations.length === excursionsByScore.length) {
-        break;
-      }
-
-      if (!recommendations.some((recommendation) => recommendation.excursionId === candidate.excursionId)) {
+      if (!recommendedExcursionIds.has(candidate.excursionId)) {
+        recommendedExcursionIds.add(candidate.excursionId);
         recommendations.push({
           excursionId: candidate.excursionId,
           score: candidate.score,

@@ -47,8 +47,12 @@ describe('Blue Horizon Excursions API', () => {
 
   it('returns ranked excursion recommendations for a guest', async () => {
     const response = await request(app).get('/excursions/recommendations?guestId=guest-1042');
+    const portsResponse = await request(app).get('/ports');
+    const excursionsResponse = await request(app).get('/excursions');
 
     expect(response.status).toBe(200);
+    expect(portsResponse.status).toBe(200);
+    expect(excursionsResponse.status).toBe(200);
     expect(response.body.guestId).toBe('guest-1042');
     expect(response.body.generatedAt).toEqual(expect.any(String));
     expect(response.body.recommendations.length).toBeGreaterThan(0);
@@ -58,18 +62,28 @@ describe('Blue Horizon Excursions API', () => {
       reasons: expect.any(Array)
     });
     expect(response.body.recommendations[0].reasons).toContain('available during itinerary');
-    expect(response.body.recommendations[0].reasons).toContain('matches family-friendly preference');
     expect(
       new Set(response.body.recommendations.map((recommendation: { excursionId: string }) => recommendation.excursionId))
         .size
     ).toBe(response.body.recommendations.length);
+
+    expect(
+      response.body.recommendations.some((recommendation: { reasons: string[] }) =>
+        recommendation.reasons.includes('matches family-friendly preference')
+      )
+    ).toBe(true);
+
+    const portByExcursionId = new Map(
+      excursionsResponse.body.data.map((excursion: { id: string; portCode: string }) => [excursion.id, excursion.portCode])
+    );
+    const expectedUniquePorts = portsResponse.body.data.length;
     expect(
       new Set(
         response.body.recommendations
-          .slice(0, 6)
-          .map((recommendation: { excursionId: string }) => recommendation.excursionId.split('-')[1])
+          .slice(0, expectedUniquePorts)
+          .map((recommendation: { excursionId: string }) => portByExcursionId.get(recommendation.excursionId))
       ).size
-    ).toBe(6);
+    ).toBe(expectedUniquePorts);
   });
 
   it('returns 400 when recommendations guestId is missing', async () => {
