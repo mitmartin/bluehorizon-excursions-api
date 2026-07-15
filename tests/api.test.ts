@@ -45,6 +45,13 @@ describe('Blue Horizon Excursions API', () => {
     ]);
   });
 
+  it('returns similar excursions for the same port', async () => {
+    const response = await request(app).get('/excursions/exc-nas-reef-01/similar');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.map((excursion: { id: string }) => excursion.id)).toContain('exc-nas-kayak-03');
+  });
+
   it('creates a booking for a valid request', async () => {
     const response = await request(app)
       .post('/bookings')

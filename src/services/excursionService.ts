@@ -36,6 +36,24 @@ export class ExcursionService {
     return this.withAvailability(excursion);
   }
 
+  getSimilarExcursions(id: string): ExcursionDetail[] {
+    const excursion = this.repository.getExcursionById(id);
+    if (!excursion) {
+      return [];
+    }
+
+    return this.repository
+      .listExcursions()
+      .filter((candidate) => {
+        const sharedTags = candidate.tags.filter((tag) => excursion.tags.includes(tag));
+        const samePort = candidate.portCode === excursion.portCode;
+        const sameDifficulty = candidate.difficulty === excursion.difficulty;
+
+        return candidate.id !== id && samePort && (sameDifficulty || sharedTags.length > 0);
+      })
+      .map((candidate) => this.withAvailability(candidate));
+  }
+
   search(criteria: ExcursionSearchCriteria): ExcursionDetail[] {
     const keywordMatcher = criteria.q ? new RegExp(criteria.q, 'i') : undefined;
 
