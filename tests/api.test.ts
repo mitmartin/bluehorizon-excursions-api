@@ -46,9 +46,11 @@ describe('Blue Horizon Excursions API', () => {
   });
 
   it('returns ranked excursion recommendations for a guest', async () => {
-    const response = await request(app).get('/excursions/recommendations?guestId=guest-1042');
-    const portsResponse = await request(app).get('/ports');
-    const excursionsResponse = await request(app).get('/excursions');
+    const [response, portsResponse, excursionsResponse] = await Promise.all([
+      request(app).get('/excursions/recommendations?guestId=guest-1042'),
+      request(app).get('/ports'),
+      request(app).get('/excursions')
+    ]);
 
     expect(response.status).toBe(200);
     expect(portsResponse.status).toBe(200);
