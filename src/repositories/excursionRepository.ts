@@ -10,6 +10,7 @@ const bookings: Booking[] = [
     guestId: 'guest-1001',
     guestName: 'Jordan Lee',
     partySize: 4,
+    totalPrice: 516,
     status: 'confirmed',
     createdAt: '2026-07-01T14:20:00.000Z'
   },
@@ -20,6 +21,7 @@ const bookings: Booking[] = [
     guestId: 'guest-1002',
     guestName: 'Riley Chen',
     partySize: 2,
+    totalPrice: 278,
     status: 'confirmed',
     createdAt: '2026-07-04T18:05:00.000Z'
   }

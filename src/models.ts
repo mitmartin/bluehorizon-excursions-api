@@ -36,6 +36,7 @@ export interface Booking {
   guestId: string;
   guestName: string;
   partySize: number;
+  totalPrice: number;
   status: 'confirmed' | 'waitlisted' | 'cancelled';
   createdAt: string;
 }

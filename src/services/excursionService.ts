@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { ExcursionRepository } from '../repositories/excursionRepository.js';
+import { calculateBookingTotal } from './pricing.js';
 import type { Booking, BookingRequest, Difficulty, Excursion, ExcursionSearchCriteria, Port } from '../models.js';
 
 export interface ExcursionDetail extends Excursion {
@@ -75,6 +76,7 @@ export class ExcursionService {
       guestId: request.guestId,
       guestName: request.guestName,
       partySize: request.partySize,
+      totalPrice: calculateBookingTotal(excursion!, request.partySize),
       status: 'confirmed',
       createdAt: new Date().toISOString()
     });

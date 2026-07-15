@@ -59,6 +59,7 @@ describe('Blue Horizon Excursions API', () => {
     expect(response.status).toBe(201);
     expect(response.body.data.status).toBe('confirmed');
     expect(response.body.data.partySize).toBe(2);
+    expect(response.body.data.totalPrice).toBeGreaterThan(0);
   });
 
   it.todo('returns excursions on the requested local date regardless of server timezone');
