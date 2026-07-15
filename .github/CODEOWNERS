@@ -1,0 +1,6 @@
+# Demo ownership for Blue Horizon Cruise Line API changes.
+* @mitmartin
+
+/src/routes/ @mitmartin
+/src/services/ @mitmartin
+/openapi.yaml @mitmartin

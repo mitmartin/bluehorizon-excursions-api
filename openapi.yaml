@@ -1,0 +1,101 @@
+openapi: 3.0.3
+info:
+  title: Blue Horizon Excursions API
+  version: 1.0.0
+  description: Shore excursions REST API for the fictional Blue Horizon Cruise Line.
+servers:
+  - url: http://localhost:3000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+  /ports:
+    get:
+      summary: List ports of call
+      responses:
+        '200':
+          description: Port list
+  /excursions:
+    get:
+      summary: List excursions
+      parameters:
+        - in: query
+          name: port
+          schema:
+            type: string
+        - in: query
+          name: difficulty
+          schema:
+            type: string
+            enum: [easy, moderate, active]
+      responses:
+        '200':
+          description: Excursion list
+  /excursions/{id}:
+    get:
+      summary: Get excursion by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Excursion detail
+        '404':
+          description: Excursion not found
+  /excursions/search:
+    get:
+      summary: Search excursions
+      parameters:
+        - in: query
+          name: port
+          schema:
+            type: string
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: maxPrice
+          schema:
+            type: number
+        - in: query
+          name: q
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+  /bookings:
+    post:
+      summary: Create a booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [excursionId, guestId, guestName, partySize, departureId]
+              properties:
+                excursionId:
+                  type: string
+                guestId:
+                  type: string
+                guestName:
+                  type: string
+                partySize:
+                  type: integer
+                  minimum: 1
+                departureId:
+                  type: string
+      responses:
+        '201':
+          description: Booking created
+        '400':
+          description: Invalid booking request
