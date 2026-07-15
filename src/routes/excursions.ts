@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ExcursionService } from '../services/excursionService.js';
-import type { Difficulty } from '../models.js';
+import type { Difficulty, ExcursionSortField, SortOrder } from '../models.js';
 
 export const excursionsRouter = Router();
 const service = new ExcursionService();
@@ -8,8 +8,12 @@ const service = new ExcursionService();
 excursionsRouter.get('/', (req, res) => {
   const difficulty = typeof req.query.difficulty === 'string' ? (req.query.difficulty as Difficulty) : undefined;
   const port = typeof req.query.port === 'string' ? req.query.port : undefined;
+  const sort = typeof req.query.sort === 'string' ? (req.query.sort as ExcursionSortField) : undefined;
+  const order = typeof req.query.order === 'string' ? (req.query.order as SortOrder) : undefined;
+  const limit = typeof req.query.limit === 'string' ? Number(req.query.limit) : undefined;
+  const offset = typeof req.query.offset === 'string' ? Number(req.query.offset) : undefined;
 
-  res.json({ data: service.listExcursions({ port, difficulty }) });
+  res.json({ data: service.listExcursions({ port, difficulty, sort, order, limit, offset }) });
 });
 
 excursionsRouter.get('/search', (req, res) => {

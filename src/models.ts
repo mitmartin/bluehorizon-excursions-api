@@ -54,3 +54,15 @@ export interface ExcursionSearchCriteria {
   maxPrice?: number;
   q?: string;
 }
+
+export type ExcursionSortField = 'title' | 'adultPrice' | 'durationMinutes';
+export type SortOrder = 'asc' | 'desc';
+
+export interface ExcursionListOptions {
+  port?: string;
+  difficulty?: Difficulty;
+  sort?: ExcursionSortField;
+  order?: SortOrder;
+  limit?: number;
+  offset?: number;
+}
