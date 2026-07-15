@@ -99,11 +99,6 @@ export class ExcursionService {
   }
 
   private hasDepartureOnDate(excursion: Excursion, date: string): boolean {
-    const requestedDate = new Date(date);
-
-    return excursion.departures.some((departure) => {
-      const departureDate = new Date(departure.startsAt);
-      return departureDate.toDateString() === requestedDate.toDateString();
-    });
+    return excursion.departures.some((departure) => departure.startsAt.slice(0, 10) === date);
   }
 }

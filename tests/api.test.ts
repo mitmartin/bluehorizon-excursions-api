@@ -61,6 +61,12 @@ describe('Blue Horizon Excursions API', () => {
     expect(response.body.data.partySize).toBe(2);
   });
 
-  it.todo('returns excursions on the requested local date regardless of server timezone');
+  it('returns Nassau excursions on the requested local date regardless of server timezone', async () => {
+    const response = await request(app).get('/excursions/search?date=2026-08-15&port=NAS');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(3);
+    expect(response.body.data.every((excursion: { portCode: string }) => excursion.portCode === 'NAS')).toBe(true);
+  });
   it.todo('returns 400 instead of 500 for invalid booking payloads');
 });
