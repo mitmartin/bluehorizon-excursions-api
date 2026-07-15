@@ -27,6 +27,17 @@ describe('Blue Horizon Excursions API', () => {
     expect(response.body.data.every((excursion: { portCode: string }) => excursion.portCode === 'NAS')).toBe(true);
   });
 
+  it('sorts excursions by adult price', async () => {
+    const response = await request(app).get('/excursions?port=NAS&sort=adultPrice&order=desc');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.map((excursion: { id: string }) => excursion.id)).toEqual([
+      'exc-nas-kayak-03',
+      'exc-nas-reef-01',
+      'exc-nas-food-02'
+    ]);
+  });
+
   it('gets one excursion with availability by departure', async () => {
     const response = await request(app).get('/excursions/exc-nas-reef-01');
 

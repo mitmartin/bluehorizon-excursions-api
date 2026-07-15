@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { ExcursionRepository } from '../repositories/excursionRepository.js';
-import type { Booking, BookingRequest, Difficulty, Excursion, ExcursionSearchCriteria, Port } from '../models.js';
+import type { Booking, BookingRequest, Excursion, ExcursionListOptions, ExcursionSearchCriteria, Port } from '../models.js';
 
 export interface ExcursionDetail extends Excursion {
   port: Port | undefined;
@@ -23,8 +23,35 @@ export class ExcursionService {
     return this.repository.listPorts();
   }
 
-  listExcursions(filters?: { port?: string; difficulty?: Difficulty }): Excursion[] {
-    return this.repository.listExcursions(filters);
+  listExcursions(filters?: ExcursionListOptions): Excursion[] {
+    let results = this.repository.listExcursions(filters);
+
+    if (filters?.sort) {
+      const direction = filters.order === 'desc' ? -1 : 1;
+
+      results = [...results].sort((left, right) => {
+        const leftValue = this.getSortValue(left, filters.sort!);
+        const rightValue = this.getSortValue(right, filters.sort!);
+
+        if (leftValue < rightValue) {
+          return -1 * direction;
+        }
+
+        if (leftValue > rightValue) {
+          return direction;
+        }
+
+        return 0;
+      });
+    }
+
+    if (filters?.limit !== undefined || filters?.offset !== undefined) {
+      const offset = filters.offset ?? 0;
+      const end = filters.limit === undefined ? undefined : offset + filters.limit + 1;
+      results = results.slice(offset, end);
+    }
+
+    return results;
   }
 
   getExcursion(id: string): ExcursionDetail | undefined {
@@ -105,5 +132,17 @@ export class ExcursionService {
       const departureDate = new Date(departure.startsAt);
       return departureDate.toDateString() === requestedDate.toDateString();
     });
+  }
+
+  private getSortValue(excursion: Excursion, sort: ExcursionListOptions['sort']): string | number {
+    if (sort === 'durationMinutes') {
+      return Math.min(...excursion.departures.map((departure) => departure.durationMinutes));
+    }
+
+    if (sort === 'adultPrice') {
+      return excursion.adultPrice;
+    }
+
+    return excursion.title;
   }
 }
