@@ -21,6 +21,10 @@ excursionsRouter.get('/search', (req, res) => {
   res.json({ data: service.search({ port, date, maxPrice, q }) });
 });
 
+excursionsRouter.get('/:id/similar', (req, res) => {
+  res.json({ data: service.getSimilarExcursions(req.params.id) });
+});
+
 excursionsRouter.get('/:id', (req, res) => {
   const excursion = service.getExcursion(req.params.id);
 
